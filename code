@@ -1,0 +1,80 @@
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+const int buttonPin = 1;
+const int buzzerPin = 6;
+const int ledPin = 7;
+
+unsigned long startTime;
+unsigned long reactionTime;
+bool flag = false;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  
+  lcd.begin(16, 2);
+  lcd.print("Reaction Timer");
+  delay(3000);
+  lcd.clear();
+
+  beep(1, 150);//oru vattam beep with an interval of 150s
+}
+
+void loop() {
+  lcd.setCursor(0, 0);
+  lcd.print("Get Ready...");
+  digitalWrite(ledPin, LOW);
+  delay(1000);
+
+  
+  if (digitalRead(buttonPin) == LOW) {
+    lcd.clear();
+    lcd.print("Too Early!");
+    beep(2, 100);
+    delay(2000);
+    lcd.clear();
+    return;
+  }
+
+  delay(random(2000, 5000)); 
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Go!");
+  digitalWrite(ledPin, HIGH);
+  startTime = millis();//returns the number of milliseconds since the arduino has powered
+  flag = true;
+
+  while (flag) {
+    if (digitalRead(buttonPin) == LOW) {
+      reactionTime = millis() - startTime;
+      flag = false;
+    }
+  }
+
+  digitalWrite(ledPin, LOW);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Your time:");
+  lcd.setCursor(2, 1);
+  lcd.print(reactionTime);
+  lcd.print(" ms");
+
+  beep(2, 200);
+
+  delay(5000); 
+  lcd.clear();
+}
+
+void beep(int times, int duration) {
+  for (int i = 0; i < times; i++) {
+    digitalWrite(buzzerPin, HIGH);
+    delay(duration);
+    digitalWrite(buzzerPin, LOW);
+    delay(duration);
+  }
+}
